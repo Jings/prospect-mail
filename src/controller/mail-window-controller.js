@@ -3,9 +3,9 @@ const settings = require('electron-settings')
 const CssInjector = require('../js/css-injector')
 const path = require('path')
 
-const outlookUrl = 'https://outlook.office.com/mail'
-const deeplinkUrls = ['outlook.live.com/mail/deeplink', 'outlook.office365.com/mail/deeplink', 'outlook.office.com/mail/deeplink']
-const outlookUrls = ['outlook.live.com', 'outlook.office365.com', 'outlook.office.com']
+const outlookUrl = 'https://webapp.service-unicepta.de/owa/#path=/mail'
+const deeplinkUrls = []
+const outlookUrls = []
 
 class MailWindowController {
     constructor() {
@@ -34,6 +34,7 @@ class MailWindowController {
 
         // Show window handler
         ipcMain.on('show', (event) => {
+            console.log(event);
             this.show()
         })
 
@@ -79,10 +80,10 @@ class MailWindowController {
                         require('electron').ipcRenderer.send('updateUnread', unreadSpan.hasChildNodes());
 
                         // Scrape messages and pop up a notification
-                        var messages = document.querySelectorAll('div[role="listbox"][aria-label="Message list"]');
+                        var messages = document.querySelectorAll('div[aria-label="E-Mail-Liste"]');
                         if (messages.length)
                         {
-                            var unread = messages[0].querySelectorAll('div[aria-label^="Unread"]');
+                            var unread = messages[0].querySelectorAll('div[aria-label^="1 Ungelesen"]');
                             var body = "";
                             for (var i = 0; i < unread.length; i++)
                             {
@@ -90,7 +91,7 @@ class MailWindowController {
                                 {
                                     body += "\\n";
                                 }
-                                body += unread[i].getAttribute("aria-label").substring(7, 127);
+                                body += unread[i].getAttribute("aria-label").substring(17, 152);
                             }
                             if (unread.length)
                             {
@@ -105,7 +106,7 @@ class MailWindowController {
                         }
                     });
                 });
-            
+
                 observer.observe(unreadSpan, {childList: true});
 
                 // If the div containing reminders gets taller we probably got a new

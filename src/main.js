@@ -1,4 +1,4 @@
-const { app } = require('electron')
+const { BrowserWindow, app, ipcMain } = require('electron')
 const MailWindowController = require('./controller/mail-window-controller')
 const TrayController = require('./controller/tray-controller')
 
@@ -49,6 +49,29 @@ class ProspectMail {
         this.mailController.show()
       }
     })
+
+    app.on('login', (event, webContents, request, authInfo, callback) => {
+      event.preventDefault();
+      this.createAuthPrompt().then(credentials => {
+        callback(credentials.username, credentials.password);
+      });
+    })
+  }
+
+  createAuthPrompt() {
+    const authPromptWin = new BrowserWindow();
+    authPromptWin.loadFile("auth-form.html"); // load your html form
+
+    return new Promise((resolve, reject) => {
+      ipcMain.once("form-submission", (event, username, password) => {
+        authPromptWin.close();
+        const credentials = {
+          username,
+          password
+        };
+        resolve(credentials);
+      });
+    });
   }
 
   createControllers() {
